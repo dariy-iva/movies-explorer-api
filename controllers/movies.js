@@ -51,16 +51,16 @@ module.exports.getUsersMovies = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  const movieId = req.params._id;
+  const { movieId } = req.params;
   const userId = req.user._id;
 
   Movie.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError('Карточка не найдена');
+        throw new NotFoundError('Фильм не найден');
       }
       if (!movie.owner.equals(userId)) {
-        throw new ForbiddenError('Невозможно удалить чужую карточку');
+        throw new ForbiddenError('Невозможно удалить чужой фильм');
       }
       return movie.remove().then(() => res.status(200).send(movie));
     })
