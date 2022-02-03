@@ -6,8 +6,20 @@ const ValidationError = require('../errors/validation-err');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
+const {
+  validationErrorName,
+  castErrorName,
+  validationErrorText,
+  conflictUserErrorText,
+  unauthorizedErrorText,
+  notFoundUserErrorText,
+  succcessfulLogoutText,
+} = require('../utils/constantsText');
+const { configServer } = require('../utils/config');
 
-const { JWT_SECRET, NODE_ENV } = process.env;
+const {
+  JWT_SECRET = configServer.JWT_SECRET,
+} = process.env;
 
 module.exports.createUser = (req, res, next) => {
   const {
@@ -17,7 +29,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new ConflictError('Пользователь с таким email уже существует');
+        throw new ConflictError(conflictUserErrorText);
       }
       bcrypt
         .hash(password, 10)
@@ -31,8 +43,8 @@ module.exports.createUser = (req, res, next) => {
         }));
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные'));
+      if (err.name === validationErrorName) {
+        next(new ValidationError(validationErrorText));
       }
       next(err);
     });
@@ -45,7 +57,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        JWT_SECRET,
         { expiresIn: '7d' },
       );
       res
@@ -60,7 +72,7 @@ module.exports.login = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'Error') {
-        next(new UnauthorizedError('Некорректно введены почта или пароль'));
+        next(new UnauthorizedError(unauthorizedErrorText));
       }
       next(err);
     });
@@ -70,7 +82,7 @@ module.exports.logout = (req, res) => {
   res
     .clearCookie('jwt')
     .status(200)
-    .send('Успешный выход');
+    .send(succcessfulLogoutText);
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
@@ -79,13 +91,13 @@ module.exports.getCurrentUser = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        throw new NotFoundError(notFoundUserErrorText);
       }
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new ValidationError('Переданы некорректные данные'));
+      if (err.name === castErrorName) {
+        next(new ValidationError(validationErrorText));
       }
       next(err);
     });
@@ -96,7 +108,7 @@ module.exports.updateUserProfile = (req, res, next) => {
   const { name, email } = req.body;
 
   if (!name || !email) {
-    throw new ValidationError('Переданы некорректные данные');
+    throw new ValidationError(validationErrorText);
   }
 
   User.findByIdAndUpdate(
@@ -106,15 +118,15 @@ module.exports.updateUserProfile = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        throw new NotFoundError(notFoundUserErrorText);
       }
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные'));
-      } else if (err.name === 'CastError') {
-        next(new ValidationError('Переданы некорректные данные'));
+      if (err.name === validationErrorName) {
+        next(new ValidationError(validationErrorText));
+      } else if (err.name === castErrorName) {
+        next(new ValidationError(validationErrorText));
       }
       next(err);
     });

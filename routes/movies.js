@@ -6,10 +6,11 @@ const {
   getUsersMovies,
   deleteMovie,
 } = require('../controllers/movies');
+const { validationURLErrorText } = require('../utils/constantsText');
 
 const checkURL = (value) => {
   if (!isURL(value, { require_protocol: true })) {
-    throw new Error('Неправильный формат ссылки');
+    throw new Error(validationURLErrorText);
   }
   return value;
 };

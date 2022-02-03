@@ -1,12 +1,19 @@
+require('dotenv').config();
 const express = require('express');
-
-const app = express();
 
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
+
 const { celebrate, Joi, errors } = require('celebrate');
+
+const { configServer } = require('./utils/config');
+const { limiter } = require('./utils/limiter');
+const {
+  internalServerErrorText,
+  notFoundPathErrorText,
+  serverStartedText,
+} = require('./utils/constantsText');
 
 const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -15,15 +22,14 @@ const { auth } = require('./middlewares/auth');
 const { createUser, login, logout } = require('./controllers/users');
 const NotFoundError = require('./errors/not-found-err');
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
+const {
+  PORT = configServer.PORT,
+  MONGO_DB = configServer.MONGO_DB,
+} = process.env;
 
-const { PORT = 3000 } = process.env;
-require('dotenv').config();
+const app = express();
 
-mongoose.connect('mongodb://localhost:27017/moviesdb', {
+mongoose.connect(MONGO_DB, {
   useNewUrlParser: true,
 });
 
@@ -63,7 +69,7 @@ app.use('/users', require('./routes/users'));
 app.use('/movies', require('./routes/movies'));
 
 app.use('*', (req, res, next) => {
-  next(new NotFoundError('Маршрут не найден'));
+  next(new NotFoundError(notFoundPathErrorText));
 });
 
 app.use(errorLogger);
@@ -72,11 +78,11 @@ app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+    message: statusCode === 500 ? internalServerErrorText : message,
   });
   next();
 });
 
 app.listen(PORT, () => {
-  console.log('Server started');
+  console.log(serverStartedText);
 });
