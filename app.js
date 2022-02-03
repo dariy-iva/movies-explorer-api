@@ -15,7 +15,7 @@ const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const centralErrorHandler = require('./middlewares/centralErrorHandler');
 
-const { router } = require('./routes/index');
+const router = require('./routes/index');
 
 const {
   PORT = configServer.PORT,
