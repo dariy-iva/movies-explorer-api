@@ -5,22 +5,17 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 
 const { configServer } = require('./utils/config');
 const { limiter } = require('./utils/limiter');
-const {
-  internalServerErrorText,
-  notFoundPathErrorText,
-  serverStartedText,
-} = require('./utils/constantsText');
+const { serverStartedText } = require('./utils/constantsText');
 
 const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { auth } = require('./middlewares/auth');
+const centralErrorHandler = require('./middlewares/centralErrorHandler');
 
-const { createUser, login, logout } = require('./controllers/users');
-const NotFoundError = require('./errors/not-found-err');
+const { router } = require('./routes/index');
 
 const {
   PORT = configServer.PORT,
@@ -41,47 +36,11 @@ app.use(requestLogger);
 app.use(limiter);
 app.use(cors);
 
-app.post(
-  '/signup',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required().min(8),
-      name: Joi.string().required().min(2).max(30),
-    }),
-  }),
-  createUser,
-);
-app.post(
-  '/signin',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required().min(8),
-    }),
-  }),
-  login,
-);
-app.post('/signout', logout);
-
-app.use(auth);
-app.use('/users', require('./routes/users'));
-app.use('/movies', require('./routes/movies'));
-
-app.use('*', (req, res, next) => {
-  next(new NotFoundError(notFoundPathErrorText));
-});
+app.use('/', router);
 
 app.use(errorLogger);
 app.use(errors());
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res.status(statusCode).send({
-    message: statusCode === 500 ? internalServerErrorText : message,
-  });
-  next();
-});
+app.use(centralErrorHandler);
 
 app.listen(PORT, () => {
   console.log(serverStartedText);

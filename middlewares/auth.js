@@ -8,7 +8,7 @@ const {
   JWT_SECRET = configServer.JWT_SECRET,
 } = process.env;
 
-module.exports.auth = (req, res, next) => {
+module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
 
   if (!token) {
