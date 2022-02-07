@@ -49,12 +49,12 @@ module.exports.validateCreateMovie = celebrate({
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
     thumbnail: Joi.string().required().custom(checkURL),
-    movieId: Joi.string().required().length(24).hex(),
+    movieId: Joi.number().required(),
   }),
 });
 
 module.exports.validateDeleteMovie = celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().length(24).hex(),
+    id: Joi.string().length(24).hex(),
   }),
 });
