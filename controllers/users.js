@@ -123,11 +123,14 @@ module.exports.updateUserProfile = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === validationErrorName) {
+      if (err.code === 11000) {
+        next(new ConflictError(conflictUserErrorText));
+      } else if (err.name === validationErrorName) {
         next(new ValidationError(validationErrorText));
       } else if (err.name === castErrorName) {
         next(new ValidationError(validationErrorText));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
