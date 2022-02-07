@@ -44,8 +44,9 @@ module.exports.createMovie = (req, res, next) => {
     .catch((err) => {
       if (err.name === validationErrorName) {
         next(new ValidationError(validationErrorText));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -74,7 +75,8 @@ module.exports.deleteMovie = (req, res, next) => {
     .catch((err) => {
       if (err.name === castErrorName) {
         next(new ValidationError(validationErrorText));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };

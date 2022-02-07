@@ -69,8 +69,9 @@ module.exports.login = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'Error') {
         next(new UnauthorizedError(unauthorizedErrorText));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -94,8 +95,9 @@ module.exports.getCurrentUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === castErrorName) {
         next(new ValidationError(validationErrorText));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
