@@ -26,28 +26,24 @@ module.exports.createUser = (req, res, next) => {
     email, password, name,
   } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        throw new ConflictError(conflictUserErrorText);
-      }
-      bcrypt
-        .hash(password, 10)
-        .then((hash) => User.create({
-          email,
-          password: hash,
-          name,
-        }))
-        .then(() => res.status(200).send({
-          email, name,
-        }));
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({
+      email, password: hash, name,
     })
-    .catch((err) => {
-      if (err.name === validationErrorName) {
-        next(new ValidationError(validationErrorText));
-      }
-      next(err);
-    });
+      .then(() => res.status(200).send({
+        email, name,
+      }))
+      .catch((err) => {
+        if (err.name === validationErrorName) {
+          next(new ValidationError(validationErrorText));
+        } else if (err.code === 11000) {
+          next(new ConflictError(conflictUserErrorText));
+        } else {
+          next(err);
+        }
+      }))
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
