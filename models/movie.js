@@ -33,7 +33,7 @@ const movieSchema = new mongoose.Schema({
       message: validationURLErrorText,
     },
   },
-  trailer: {
+  trailerLink: {
     type: String,
     required: true,
     validate: {
