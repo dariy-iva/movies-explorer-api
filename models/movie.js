@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const { validationURLErrorText } = require('../utils/constantsText');
+const mongoose = require("mongoose");
+const validator = require("validator");
+const { validationURLErrorText } = require("../utils/constantsText");
 
 const movieSchema = new mongoose.Schema({
   country: {
@@ -33,7 +33,7 @@ const movieSchema = new mongoose.Schema({
       message: validationURLErrorText,
     },
   },
-  trailerLink: {
+  trailer: {
     type: String,
     required: true,
     validate: {
@@ -56,7 +56,7 @@ const movieSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'user',
+    ref: "user",
   },
   movieId: {
     type: Number,
@@ -76,4 +76,4 @@ const movieSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('movie', movieSchema);
+module.exports = mongoose.model("movie", movieSchema);
