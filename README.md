@@ -1,7 +1,7 @@
 # Дипломный проект Movies (бэкенд)
 📧  
 [Доменное имя: api.movies.dariy-iva.nomoredomains.work](https://api.movies.dariy-iva.nomoredomains.work/)  
-Публичный IP: 84.201.172.179
+Публичный IP: 62.84.126.164
 
 ## О проекте
 
